@@ -34,6 +34,8 @@ export class UserRepository extends Repository<User> {
     return user;
   }
 
+  async updatePassword() {}
+
   async updateUser(id: number, editUserDto: EditUserDto): Promise<UserDto> {
     const user = this.findOne(id);
     console.log(id);
@@ -44,6 +46,7 @@ export class UserRepository extends Repository<User> {
       ((await user).email = editUserDto.email),
       ((await user).password = editUserDto.password),
       ((await user).address = editUserDto.address);
+
     (await user).save();
     console.log((await user).id, user);
     return user;

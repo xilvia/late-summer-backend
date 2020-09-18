@@ -39,7 +39,9 @@ export class UserController {
   }
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
+  async create(
+    @Body(ValidationPipe) createUserDto: CreateUserDto,
+  ): Promise<UserDto> {
     console.log(createUserDto);
     return await this.userService.createUser(createUserDto);
   }
@@ -48,6 +50,7 @@ export class UserController {
   login(
     @Body(ValidationPipe) authUserDto: AuthUserDto,
   ): Promise<{ token: string }> {
+    console.log(authUserDto);
     return this.userService.login(authUserDto);
   }
 

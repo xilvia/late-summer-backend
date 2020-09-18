@@ -21,7 +21,7 @@ export class EditUserDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(12)
-  @Matches(/^(?=.*\d)(?=.*[a-zA-Z]).{4,12}$/)
+  @Matches(/^(?=.*\d*)(?=.*[a-zA-Z]).{4,12}$/)
   userName: string;
 
   @IsNotEmpty()
