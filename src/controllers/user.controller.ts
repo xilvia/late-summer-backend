@@ -50,7 +50,6 @@ export class UserController {
   login(
     @Body(ValidationPipe) authUserDto: AuthUserDto,
   ): Promise<{ token: string }> {
-    console.log(authUserDto);
     return this.userService.login(authUserDto);
   }
 

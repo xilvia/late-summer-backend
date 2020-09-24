@@ -5,7 +5,7 @@ import { EditUserDto } from '../dtos/editUserDto';
 import { CreateUserDto } from '../dtos/createUserDto';
 import { UserDto } from '../dtos/userDto';
 import { UserRepository } from '../repository/userRepository';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { AuthUserDto } from 'src/dtos/authUserDto';
 import { JwtPayload } from 'src/jwt/jwt-payload.interface';
 
@@ -43,31 +43,28 @@ export class UserService {
     await this.userRepository.delete(id);
   }
 
-  public async login(authUserDto: AuthUserDto): Promise<{ token: string }> {
+  public async login(
+    authUserDto: AuthUserDto,
+  ): Promise<{ token: string; expiresIn: string; userId: number }> {
     const userName = await this.userRepository.validateUserPassword(
       authUserDto,
     );
     if (!userName) {
       throw new UnauthorizedException('Invalid credentials');
     }
+    const user = this.userRepository.findUserId(authUserDto);
+    const userId = await user;
 
+    const expiresIn = process.env.JWT_SECRET || '3600';
     const payload: JwtPayload = { userName };
-    const token = await this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload);
     this.logger.debug(
-      `Generated JWT Token with payload ${JSON.stringify(payload)}`,
+      `Generated JWT Token with payload ${JSON.stringify(
+        payload,
+      )}, ${expiresIn}, ${userId}`,
     );
-
-    return { token };
+    return { token, expiresIn, userId };
   }
 
-  public async validate(payload: JwtPayload): Promise<User> {
-    const { userName } = payload;
-    const user = await this.userRepository.findOne({ userName });
-
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-
-    return user;
-  }
+  
 }

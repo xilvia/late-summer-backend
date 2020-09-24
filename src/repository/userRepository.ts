@@ -9,22 +9,25 @@ import {
 } from '@nestjs/common';
 import { EditUserDto } from '../dtos/editUserDto';
 import * as bcrypt from 'bcryptjs';
+import { ValidatorService } from '../services/validator.service';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
   async postUser(createUserDto: CreateUserDto): Promise<UserDto> {
     const user = new User();
+
     user.firstName = createUserDto.firstName;
     user.lastName = createUserDto.lastName;
     user.userName = createUserDto.userName;
     user.email = createUserDto.email;
     user.salt = await bcrypt.genSalt();
     user.password = await this.hashPassword(createUserDto.password, user.salt);
-    user.address = createUserDto.address;
+
     try {
       await user.save();
     } catch (error) {
       console.error(error.stack);
+
       // if (error.code === '23505') {
       //   throw new ConflictException('Username already exists');
       // } else {
@@ -34,7 +37,7 @@ export class UserRepository extends Repository<User> {
     return user;
   }
 
-  async updatePassword() {}
+  async changePassword() {}
 
   async updateUser(id: number, editUserDto: EditUserDto): Promise<UserDto> {
     const user = this.findOne(id);
@@ -45,9 +48,7 @@ export class UserRepository extends Repository<User> {
       ((await user).userName = editUserDto.userName),
       ((await user).email = editUserDto.email),
       ((await user).password = editUserDto.password),
-      ((await user).address = editUserDto.address);
-
-    (await user).save();
+      (await user).save();
     console.log((await user).id, user);
     return user;
   }
@@ -61,6 +62,13 @@ export class UserRepository extends Repository<User> {
     } else {
       return null;
     }
+  }
+
+  async findUserId(authUserDto: AuthUserDto): Promise<number> {
+    const { userName } = authUserDto;
+    const user = await this.findOne({ userName });
+    const userId = user.id;
+    return userId;
   }
 
   private async hashPassword(password: string, salt: string): Promise<string> {

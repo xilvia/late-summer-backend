@@ -38,8 +38,4 @@ export class UserDto {
     { message: 'password error' },
   )
   password: string;
-
-  @IsNotEmpty()
-  @Matches(/^\d+\s[A-z]+\s[A-z]+/, { message: 'address error' })
-  address: string;
 }
